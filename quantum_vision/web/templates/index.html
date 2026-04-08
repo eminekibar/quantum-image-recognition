@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kuantum Goruntu Tanima</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Kuantum Goruntu Tanima</h1>
+    <p class="subtitle">Hibrit Kuantum-Klasik Sinir Agi | Grup 3</p>
+
+    <div class="main-grid">
+      <!-- Kamera / Goruntu Paneli -->
+      <div class="panel">
+        <h2>Goruntu</h2>
+        <div class="image-box">
+          <img id="frame-img" src="" alt="Kamera frame" />
+          <div id="no-frame" class="placeholder">Goruntu bekleniyor...</div>
+        </div>
+        <div class="controls">
+          <button id="btn-capture" class="btn btn-primary">Tahmin Et</button>
+          <button id="btn-auto" class="btn btn-secondary">Otomatik (2s)</button>
+          <button id="btn-stop" class="btn btn-danger" style="display:none">Durdur</button>
+        </div>
+      </div>
+
+      <!-- Sonuc Paneli -->
+      <div class="panel">
+        <h2>Sonuc</h2>
+        <div id="result-box" class="result-box">
+          <div class="big-number" id="pred-number">—</div>
+          <div class="confidence" id="pred-confidence"></div>
+          <div class="time" id="pred-time"></div>
+        </div>
+
+        <h3>Sinif Olasiliklari</h3>
+        <div id="prob-bars"></div>
+      </div>
+    </div>
+
+    <!-- Durum -->
+    <div id="status-bar" class="status-bar"></div>
+  </div>
+
+  <script src="/static/script.js"></script>
+</body>
+</html>

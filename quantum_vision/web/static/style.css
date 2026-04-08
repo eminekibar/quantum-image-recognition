@@ -1,0 +1,91 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: #0f0f1a;
+  color: #e0e0f0;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.container { max-width: 900px; margin: 0 auto; }
+
+h1 {
+  text-align: center;
+  font-size: 2rem;
+  color: #a78bfa;
+  margin-bottom: 4px;
+}
+.subtitle { text-align: center; color: #888; margin-bottom: 24px; }
+
+.main-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+@media (max-width: 600px) { .main-grid { grid-template-columns: 1fr; } }
+
+.panel {
+  background: #1a1a2e;
+  border: 1px solid #2d2d4a;
+  border-radius: 12px;
+  padding: 20px;
+}
+.panel h2 { color: #a78bfa; margin-bottom: 12px; font-size: 1.1rem; }
+.panel h3 { color: #888; margin: 16px 0 8px; font-size: 0.9rem; }
+
+.image-box {
+  width: 100%;
+  aspect-ratio: 1;
+  background: #0d0d1a;
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+.image-box img { width: 100%; height: 100%; object-fit: contain; display: none; image-rendering: pixelated; }
+.placeholder { color: #555; font-size: 0.85rem; }
+
+.controls { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: opacity 0.2s;
+}
+.btn:hover { opacity: 0.85; }
+.btn-primary  { background: #7c3aed; color: #fff; }
+.btn-secondary { background: #1e40af; color: #fff; }
+.btn-danger   { background: #b91c1c; color: #fff; }
+
+.result-box {
+  background: #0d0d1a;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  min-height: 100px;
+}
+.big-number { font-size: 4rem; font-weight: 700; color: #a78bfa; line-height: 1; }
+.confidence { font-size: 1.1rem; color: #34d399; margin-top: 8px; }
+.time { font-size: 0.8rem; color: #666; margin-top: 4px; }
+
+.prob-bars { display: flex; flex-direction: column; gap: 4px; }
+.prob-row { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; }
+.prob-label { width: 16px; text-align: right; color: #888; }
+.prob-track { flex: 1; background: #0d0d1a; border-radius: 3px; height: 10px; overflow: hidden; }
+.prob-fill { height: 100%; background: #7c3aed; border-radius: 3px; transition: width 0.3s; }
+.prob-pct { width: 38px; color: #a78bfa; text-align: right; }
+
+.status-bar {
+  margin-top: 16px;
+  text-align: center;
+  font-size: 0.8rem;
+  color: #666;
+  min-height: 20px;
+}

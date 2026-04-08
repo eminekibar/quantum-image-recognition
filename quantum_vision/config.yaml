@@ -1,0 +1,28 @@
+model:
+  n_qubits: 4
+  n_layers: 3
+  n_classes: 10
+
+training:
+  epochs: 15
+  batch_size: 32
+  learning_rate: 0.001
+  train_samples: 2000
+  test_samples: 400
+  seed: 42
+
+camera:
+  mode: live           # mock | live | image
+  image_dir: assets/test_images/
+  frame_width: 640
+  frame_height: 480
+
+paths:
+  checkpoint: checkpoints/best_model.pth
+  log: checkpoints/training_log.json
+  data: data/
+
+web:
+  host: 0.0.0.0
+  port: 5000
+  debug: true
