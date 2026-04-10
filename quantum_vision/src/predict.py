@@ -73,9 +73,23 @@ def build_camera(config: dict) -> BaseCamera:
         raise ValueError(f"Bilinmeyen kamera modu: {mode}")
 
 
+def _has_display() -> bool:
+    """Ekran (DISPLAY) mevcut mu? Headless Pi'de False doner."""
+    import os
+    import platform
+    if platform.system() == "Linux":
+        return bool(os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY"))
+    return True  # Windows/Mac'te her zaman True
+
+
 def run_camera_loop(model, config, device):
     cam = build_camera(config)
-    print(f"Kamera modu: {config['camera']['mode']} — cikmak icin 'q' tusuna basin")
+    headless = not _has_display()
+    if headless:
+        print("Ekran algilanmadi (headless mod). Goruntu penceresi acilmayacak.")
+        print("Web arayuzu icin: python web/app.py  =>  http://<PI_IP>:5000")
+    else:
+        print(f"Kamera modu: {config['camera']['mode']} — cikmak icin 'q' tusuna basin")
     try:
         while cam.is_open():
             frame = cam.read_frame()
@@ -84,20 +98,22 @@ def run_camera_loop(model, config, device):
 
             pred, probs, ms = predict_frame(model, frame, device)
             confidence = max(probs) * 100
+            print(f"Tahmin: {pred}  Guven: %{confidence:.0f}  Sure: {ms:.0f}ms")
 
-            display = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR) if frame.ndim == 2 else frame.copy()
-            display = cv2.resize(display, (280, 280))
-            cv2.putText(display, f"Tahmin: {pred} (%{confidence:.0f})",
-                        (5, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
-            cv2.putText(display, f"{ms:.0f}ms",
-                        (5, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (200, 200, 200), 1)
-            cv2.imshow("Kuantum Goruntu Tanima", display)
-
-            if cv2.waitKey(1) & 0xFF == ord("q"):
-                break
+            if not headless:
+                display = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR) if frame.ndim == 2 else frame.copy()
+                display = cv2.resize(display, (280, 280))
+                cv2.putText(display, f"Tahmin: {pred} (%{confidence:.0f})",
+                            (5, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+                cv2.putText(display, f"{ms:.0f}ms",
+                            (5, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (200, 200, 200), 1)
+                cv2.imshow("Kuantum Goruntu Tanima", display)
+                if cv2.waitKey(1) & 0xFF == ord("q"):
+                    break
     finally:
         cam.release()
-        cv2.destroyAllWindows()
+        if not headless:
+            cv2.destroyAllWindows()
 
 
 def predict_single_image(model, image_path: str, device: torch.device):
@@ -112,9 +128,47 @@ def predict_single_image(model, image_path: str, device: torch.device):
     print(f"Tum olasiliklar: {[f'{p*100:.1f}%' for p in probs]}")
 
 
+def run_gpio_loop(model, config, device):
+    """
+    GPIO modu: butona basin -> goruntu al -> tahmin yap -> LED yak -> bip.
+    Raspberry Pi + fiziksel devre icin.
+    """
+    from gpio_controller import GPIOController
+    cam = build_camera(config)
+
+    with GPIOController() as gpio:
+        gpio.startup_animation()
+        print("GPIO modu aktif. Cikmak icin Ctrl+C.")
+        try:
+            while True:
+                gpio.wait_for_button()
+                frame = cam.read_frame()
+                if frame is None:
+                    print("Kameradan goruntu alinamadi!")
+                    continue
+
+                print("Tahmin yapiliyor...")
+                gpio.processing_animation(duration=0.8)
+
+                pred, probs, ms = predict_frame(model, frame, device)
+                confidence = max(probs) * 100
+
+                gpio.show_digit(pred)
+                gpio.blink(pred, times=2)
+                gpio.double_beep()
+
+                print(f">>> Tahmin: {pred}  Guven: %{confidence:.0f}  Sure: {ms:.0f}ms")
+
+        except KeyboardInterrupt:
+            print("\nCikiliyor...")
+        finally:
+            cam.release()
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--image", type=str, default=None, help="Tek goruntu dosya yolu")
+    parser.add_argument("--gpio", action="store_true", help="GPIO modunu aktive et (Raspberry Pi)")
     args = parser.parse_args()
 
     config = load_config()
@@ -123,6 +177,8 @@ def main():
 
     if args.image:
         predict_single_image(model, args.image, device)
+    elif args.gpio:
+        run_gpio_loop(model, config, device)
     else:
         run_camera_loop(model, config, device)
 
